@@ -1,0 +1,105 @@
+# إعدادات تطبيق المفتي بن بدران
+# Almufti Bin Badran Configuration
+
+# إعدادات عامة
+app:
+  name: "المفتي بن بدران"
+  version: "1.0.0"
+  description: "تطبيق ذكاء اصطناعي خفيف مع دعم اللغة العربية"
+  default_language: "ar"
+  supported_languages:
+    - "ar"
+    - "en"
+  offline_mode: true
+  debug: false
+
+# إعدادات قاعدة البيانات
+database:
+  type: "sqlite"
+  path: "data/almufti.db"
+  auto_backup: true
+  backup_interval: 3600  # ثانية
+  max_connections: 5
+
+# إعدادات البحث
+search:
+  engine: "duckduckgo"
+  max_results: 10
+  timeout: 10
+  enable_academic_search: true
+  enable_image_search: true
+  enable_news_search: true
+  cache_results: true
+  cache_duration: 3600
+
+# إعدادات المحادثة
+chat:
+  context_window_size: 10
+  max_message_length: 5000
+  response_timeout: 30
+  enable_typing_indicator: true
+  save_conversations: true
+
+# إعدادات التعلم المستمر
+learning:
+  continuous_learning: true
+  save_conversations: true
+  auto_improvement: true
+  learning_rate: 0.1
+  min_confidence_threshold: 0.7
+  update_knowledge_base: true
+
+# إعدادات حل الواجبات
+homework:
+  enable_math_solver: true
+  enable_science_helper: true
+  enable_essay_assistant: true
+  show_steps: true
+  explain_concepts: true
+
+# إعدادات الأداء
+performance:
+  max_memory: 2048  # MB
+  cache_size: 512   # MB
+  worker_threads: 4
+  enable_compression: true
+  optimize_memory: true
+
+# إعدادات الأمان
+security:
+  enable_input_validation: true
+  enable_output_sanitization: true
+  max_input_length: 10000
+  rate_limit_enabled: true
+  rate_limit_requests: 100
+  rate_limit_window: 3600
+
+# إعدادات السجلات
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  log_file: "logs/almufti.log"
+  max_log_size: 10485760  # 10 MB
+  backup_count: 5
+
+# إعدادات التطوير
+development:
+  enable_profiling: false
+  enable_testing_mode: false
+  verbose_output: false
+  enable_api_docs: true
+
+# إعدادات الإشعارات
+notifications:
+  enable_notifications: true
+  notification_types:
+    - "learning_milestone"
+    - "performance_improvement"
+    - "knowledge_update"
+
+# إعدادات التكامل
+integrations:
+  enable_web_search: true
+  enable_knowledge_base: true
+  enable_learning_system: true
+  enable_homework_helper: true
