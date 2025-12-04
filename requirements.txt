@@ -10,8 +10,7 @@ spacy>=3.5.0
 pyarabic>=0.6.15
 langdetect>=1.0.9
 
-# Database
-sqlite3-python>=1.0.0
+# Database (sqlite3 is built-in with Python 3)
 sqlalchemy>=2.0.0
 
 # Web Search & Information Retrieval
