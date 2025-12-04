@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  almufti:
+    build: .
+    container_name: almufti-bin-badran
+    ports:
+      - "7860:7860"  # Gradio
+      - "8000:8000"  # API (إذا تم إضافتها)
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEFAULT_LANGUAGE=ar
+      - DATABASE_PATH=/app/data/almufti.db
+    command: python app.py
+    restart: unless-stopped
+    networks:
+      - almufti-network
+
+networks:
+  almufti-network:
+    driver: bridge
