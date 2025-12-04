@@ -1,5 +1,11 @@
 # 🤖 المفتي بن بدران - Almufti Bin Badran
 
+<div align="center">
+
+![Almufti Logo](assets/logo.png)
+
+</div>
+
 **A Lightweight AI Assistant with Arabic Language Support**
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/s200077761/almufti-bin-badran)
