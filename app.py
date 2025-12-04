@@ -207,7 +207,10 @@ def analyze_text(text, language):
 
 
 # إنشاء واجهة Gradio المحسّنة
-with gr.Blocks(css=custom_css, title="المفتي بن بدران - Almufti Bin Badran", theme=gr.themes.Soft()) as demo:
+with gr.Blocks(title="المفتي بن بدران - Almufti Bin Badran", theme=gr.themes.Soft()) as demo:
+    
+    # Add custom CSS
+    gr.HTML(f"<style>{custom_css}</style>")
     
     # Header with Logo
     gr.HTML("""

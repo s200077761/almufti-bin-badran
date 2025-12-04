@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 logger = logging.getLogger(__name__)
 
