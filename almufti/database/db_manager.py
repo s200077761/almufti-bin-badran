@@ -5,6 +5,7 @@ Database Manager Module
 
 import sqlite3
 import json
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Optional, Any
@@ -28,15 +29,23 @@ class DatabaseManager:
         """
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = None
+        self._local = threading.local()
         self.init_database()
+
+    def get_connection(self):
+        """الحصول على اتصال thread-safe"""
+        if not hasattr(self._local, 'connection') or self._local.connection is None:
+            self._local.connection = sqlite3.connect(str(self.db_path), check_same_thread=False)
+            self._local.connection.row_factory = sqlite3.Row
+            # Enable WAL mode for better concurrency
+            self._local.connection.execute("PRAGMA journal_mode=WAL")
+        return self._local.connection
 
     def init_database(self):
         """تهيئة قاعدة البيانات وإنشاء الجداول"""
         try:
-            self.connection = sqlite3.connect(str(self.db_path))
-            self.connection.row_factory = sqlite3.Row
-            cursor = self.connection.cursor()
+            connection = self.get_connection()
+            cursor = connection.cursor()
 
             # جدول المحادثات
             cursor.execute("""
@@ -111,7 +120,7 @@ class DatabaseManager:
                 )
             """)
 
-            self.connection.commit()
+            self.get_connection().commit()
             logger.info("Database initialized successfully")
 
         except sqlite3.Error as e:
@@ -130,12 +139,12 @@ class DatabaseManager:
             معرف المحادثة
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 INSERT INTO conversations (title, language)
                 VALUES (?, ?)
             """, (title, language))
-            self.connection.commit()
+            self.get_connection().commit()
             return cursor.lastrowid
         except sqlite3.Error as e:
             logger.error(f"Error saving conversation: {e}")
@@ -154,12 +163,12 @@ class DatabaseManager:
             معرف الرسالة
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 INSERT INTO messages (conversation_id, role, content)
                 VALUES (?, ?, ?)
             """, (conversation_id, role, content))
-            self.connection.commit()
+            self.get_connection().commit()
             return cursor.lastrowid
         except sqlite3.Error as e:
             logger.error(f"Error adding message: {e}")
@@ -176,7 +185,7 @@ class DatabaseManager:
             بيانات المحادثة والرسائل
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             
             # استرجاع بيانات المحادثة
             cursor.execute("""
@@ -218,12 +227,12 @@ class DatabaseManager:
             معرف المعرفة
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 INSERT INTO knowledge_base (topic, content, source, confidence, language)
                 VALUES (?, ?, ?, ?, ?)
             """, (topic, content, source, confidence, language))
-            self.connection.commit()
+            self.get_connection().commit()
             return cursor.lastrowid
         except sqlite3.Error as e:
             logger.error(f"Error adding knowledge: {e}")
@@ -241,7 +250,7 @@ class DatabaseManager:
             قائمة النتائج
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 SELECT * FROM knowledge_base 
                 WHERE topic LIKE ? OR content LIKE ?
@@ -264,12 +273,12 @@ class DatabaseManager:
             feedback: ملاحظات إضافية
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 UPDATE messages SET rating = ?, feedback = ?
                 WHERE id = ?
             """, (rating, feedback, message_id))
-            self.connection.commit()
+            self.get_connection().commit()
         except sqlite3.Error as e:
             logger.error(f"Error rating message: {e}")
             raise
@@ -284,12 +293,12 @@ class DatabaseManager:
             improvement_score: درجة التحسن
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             cursor.execute("""
                 INSERT INTO learning_log (interaction_type, data, improvement_score)
                 VALUES (?, ?, ?)
             """, (interaction_type, json.dumps(data, ensure_ascii=False), improvement_score))
-            self.connection.commit()
+            self.get_connection().commit()
         except sqlite3.Error as e:
             logger.error(f"Error logging learning: {e}")
             raise
@@ -306,7 +315,7 @@ class DatabaseManager:
             قائمة الإحصائيات
         """
         try:
-            cursor = self.connection.cursor()
+            cursor = self.get_connection().cursor()
             
             if category:
                 cursor.execute("""
@@ -329,8 +338,9 @@ class DatabaseManager:
 
     def close(self):
         """إغلاق اتصال قاعدة البيانات"""
-        if self.connection:
-            self.connection.close()
+        if hasattr(self._local, 'connection') and self._local.connection:
+            self._local.connection.close()
+            self._local.connection = None
             logger.info("Database connection closed")
 
     def __enter__(self):
